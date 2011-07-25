@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>jQuery Fancy Select</title>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="demo.css">
+		<script type="text/javascript" src="../vendor/jquery.min.js"></script>
+		<script type="text/javascript" src="../jquery.fancy.select.js"></script>
+		
+		<style>
+			/**
+			 * These are the core styles. It won't look pretty if you 
+			 * use just these but it should be functional and you can
+			 * go bananas
+			 */
+			.fancy-select-container {
+				height: 200px;
+				overflow: hidden;
+				overflow-y: auto;
+				background: white;
+				width: 450px;
+			}
+			
+			.fancy-select-replaced {
+				cursor: pointer;
+			}
+		</style>
+		
+		<script>
+			$(document).ready(function() {
+				$("select.example-1").fancySelect();
+			});
+		</script>
+	</head>
+
+	<body>
+		<h1>jQuery Fancy Select Plugin
+			<span>jQuery Plugin. Version 0.5. Released 25 Jul 2011.<span></h1>
+		
+		<h2>Basic usage</h2>
+		<pre><code>$(document).ready(function() {
+	$("select.example-1").fancySelect();
+});</code></pre>
+
+		<form id="timetables-bus" action="#">
+			<fieldset>
+				<label id="ttBus" for="bus" class="pngfix">Bus Service</label>
+
+				<select class="example-1">
+					<option value="-1">Select a bus service</option>
+				 <option value="001">1 - Wellington - Island Bay</option>  <option value="002">2 - Miramar</option>  <option value="003">3 - Karori - Lyall Bay (Green Route)</option>  <option value="004">4 - Happy Valley</option>  <option value="005">5 - Hataitai</option>  <option value="006">6 - Lyall Bay</option>  <option value="007">7 - Kingston</option>  <option value="008">8 - Kowhai Park</option>  <option value="009">9 - Aro Street</option>  <option value="010">10 - Newtown Park</option>  <option value="011">11 - Seatoun</option>  <option value="013">13 - Mairangi</option>  <option value="014">14 - Wilton - Kilbirnie (Silver route)</option>  <option value="017">17 - Victoria University</option>  <option value="018">18 - Campus Connection</option>  <option value="020">20 - Mt Victoria</option>  <option value="021">21 - Wrights Hill - Vogeltown</option>  <option value="022">22 - Mairangi - Southgate</option>  <option value="023">23 - Mairangi - Southgate/Houghton Bay</option>  <option value="024">24 - Miramar Heights via Evans Bay</option>  <option value="025">25 - Strathmore (Blue route)</option>  <option value="028">28 - Beacon Hill Shuttle</option>  <option value="029">29 - Southern Shopper</option>  <option value="030">30 - Seatoun Express</option>  <option value="031">31 - Miramar North Express</option>  <option value="032">32 - Island Bay Express</option>  <option value="043">43 - Khandallah - Strathmore (Blue route)</option>  <option value="044">44 - Khandallah - Strathmore (Blue route)</option>  <option value="045">45 - Khandallah via Ngaio (Blue route)</option>  <option value="046">46 - Broadmeadows (Blue route)</option>  <option value="047">47 - Newtown to Johnsonville</option>  <option value="050">50 - Broadmeadows Shopper</option>  <option value="052">52 - Johnsonville via Newlands</option>  <option value="053">53 - Johnsonville West</option>  <option value="054">54 - Churton Park</option>  <option value="055">55 - Grenada Village</option>  <option value="056">56 - Johnsonville via Paparangi</option>  <option value="057">57 - Woodridge</option>  <option value="058">58 - Baylands</option>  <option value="080">80 - Wainuiomata Commuter</option>  <option value="081">81 - Eastbourne</option>  <option value="083">83 - Eastbourne via Lower Hutt</option>  <option value="084">84 - Gracefield</option>  <option value="085">85 - Eastbourne Express</option>  <option value="090">90 - Stokes Valley Commuter</option>  <option value="091">91 - Airport Flyer</option>  <option value="092">92 - Te Marua - Wellington</option>  <option value="093">93 - Timberlea - Wellington</option>  <option value="097">97 - WelTec Express</option>  <option value="098">98 - Upper Hutt - Porirua</option>  <option value="099">99 - Taita - Tawa</option>  <option value="110">110 - Upper Hutt</option>  <option value="111">111 - Totara Park</option>  <option value="112">112 - Te Marua</option>  <option value="114">114 - Poets Block</option>  <option value="115">115 - Pinehaven</option>  <option value="120">120 - Stokes Valley</option>  <option value="121">121 - Valley Heights</option>  <option value="130">130 - Naenae</option>  <option value="145">145 - Belmont</option>  <option value="150">150 - Western Hills</option>  <option value="154">154 - Korokoro</option>  <option value="160">160 - Wainuiomata North</option>  <option value="170">170 - Wainuiomata South</option>  <option value="200">200 - Featherston - Masterton</option>  <option value="201">201 - Masterton West</option>  <option value="202">202 - Masterton South and East</option>  <option value="203">203 - Masterton Lansdowne Circuit</option>  <option value="204">204 - Greytown - Woodside Station</option>  <option value="205">205 - Martinborough - Featherston</option>  <option value="210">210 - Titahi Bay - Johnsonville</option>  <option value="211">211 - Porirua - Courtenay Place</option>  <option value="220">220 Titahi Bay - Ascot Park </option>  <option value="226">226 Elsdon - Sievers Grove</option>  <option value="227">227-Porirua East Community Transport</option>  <option value="230">230 Whitby (The Crows Nest) - Porirua</option>  <option value="235">235 Whitby (Navigation Drive - Paremata Station</option>  <option value="236">236 Whitby (Navigation Drive) - Porirua</option>  <option value="250">250 - Paraparaumu - Raumati South</option>  <option value="260">260 - Paraparaumu - Raumati Beach</option>  <option value="261">261 - Paraparaumu Station - Paraparaumu Beach</option>  <option value="262">262 - Paraparaumu Station - Paraparaumu Beach</option>  <option value="270">270 - Paraparaumu Station - Paraparaumu East</option>  <option value="271">271 - Lindale Shuttle</option>  <option value="280">280 - Paraparaumu - Waikanae</option>  <option value="289">289 - Kapiti Commuter</option>  <option value="290">290 - Waikanae - Otaki</option>  <option value="300">300 - Whenua Tapu Cemetery</option>  <option value="3s">3s - Karori South</option>  <option value="3w">3w - Karori West</option>  <option value="LNK">LNK - Newlands Link</option>  <option value="N1">N1 - After Midnight Island Bay/Lyall Bay</option>  <option value="N2">N2 - After Midnight Miramar/Seatoun</option>  <option value="N22">N22 - After Midnight Stokes Valley/Upper Hutt</option>  <option value="N3">N3 - After Midnight Karori</option>  <option value="N4">N4 - After Midnight Khandallah</option>  <option value="N5">N5 - After Midnight Newlands</option>  <option value="N6">N6 - After Midnight Porirua</option>  <option value="N66">N66 - After Midnight Wainuiomata</option>  <option value="N8">N8 - After Midnight to Wgtn City</option>  <option value="N88">N88 - After Midnight Eastbourne</option> 
+				</select>
+			</fieldset>
+		</form>
+
+
+				
+		<h2 id="Credit">Credit</h2>
+		<p>Copyright (c) 2011 Will Rossiter (<a href="http://www.willrossi.com">willrossi.com</a>). If you would like to contact me you can do so through my <a href="http://willrossi.com">website</a>. Suggestions, patches or enhancements to the code are more then welcome to be emailed through to me or 
+			submitted through <a href="https://github.com/willrossi/jquery-fancy-select">github.com/willrossi/jquery-fancy-select</a>.</p> 
+		
+		<h2 id="License">License</h2>
+		<p><pre>Copyright (c) 2011, Will Rossiter
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of Will Rossiter nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY WILL ROSSITER ''AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL WILL ROSSITER BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+		</pre></p>
+	</body>
+</html>

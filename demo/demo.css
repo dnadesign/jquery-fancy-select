@@ -1,0 +1,62 @@
+/* Demo Page Styles - You do not need these to make it work
+ * ------------------------------------------------------------ */
+* { margin: 0; padding: 0; }
+html { background: #efefef; font: 13px/20px Helvetica, Arial, Sans-serif;}
+body { width: 720px; background: #fff; -webkit-box-shadow: 0 0 20px #ccc; -moz-box-shadow: 0 0 20px #ccc; padding: 20px; margin: 20px auto; }
+
+h1 { font-size: 36px; letter-spacing: -1px; margin-bottom: 20px; line-height: 40px;}
+	h1 span { font-size: 12px; letter-spacing: 0; display: block; color: #999; font-weight: lighter; 
+		line-height: 20px; }
+h2 { font-size: 24px; margin-bottom: 27px; border-bottom: 3px solid #f4f4f4; line-height: 40px;}
+h3 { font-size: 18px; margin-bottom: 10px; }
+
+p { margin-bottom: 20px; color: #666;}
+
+fieldset { border: none; }
+.center { text-align: center; }
+
+form { border: 1px solid #ddd; padding: 19px 20px; margin-bottom: 20px; }
+label { display: block; }
+
+pre { 
+	font-family: Monaco,"Courier New",monospace;
+	padding: 0 10px; font-size: 11px; margin-bottom: 20px; color: #666; 
+}
+	
+	pre .com { color: green; }
+	
+a { color: #5397cb; text-decoration: none; background: #f2f9ff; padding: 3px;}
+	a:focus,
+	a:hover { border-bottom: none; color: #3375a7; }
+
+ul { margin-bottom: 40px; }
+	li { margin: 0 0 10px 20px; color: #666; font-size: 13px; }
+	
+	
+.contents { background: #f5f9fc; padding: 19px; color: #999; border: 1px solid #e5eef6; 
+	-moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px;  color: #a9c6dc; }
+	
+.fancy-select-container {
+	border: 1px solid #999;
+	-moz-box-shadow: 0 10px 10px #000;
+	-webkit-box-shadow: 0 10px 10px #000;
+}
+	.fancy-select-replaced p {
+		margin: 0;
+	}
+	.fancy-select-container ul {
+		margin: 0;
+	}
+	
+	.fancy-select-container li {
+		list-style: none;
+		margin: 0;
+		padding: 5px;
+		cursor: pointer;
+		display: block;
+		cursor: pointer;
+		font: menu;
+		font-size: 11px;
+		overflow: hidden;
+		border-bottom: 1px solid #EEE;
+	}
