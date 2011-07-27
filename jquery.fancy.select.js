@@ -10,56 +10,70 @@
  * @author Will Rossiter <will@silverstripe.com>
  */
 
+/**
+ * Case insenstive contains. Used for the keyboard filtering of the select
+ * we don't want to exclude things that have a not matching case
+ */
+jQuery.expr[':'].Contains = function(a,i,m) {
+    return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase())>=0;
+};
+
 (function($) {
-	$.fn.fancySelect = function(settings) {
+	
+	$.fn.fancySelect = function(config) {
 		/**
 		 * Overridable options from your callee. All events will have callbacks
 		 * in the format onEvent and onAfterEvent. Mouse events use the mouseenter
 		 * and mouseleave format so that behaviour is consistent.
 		 */
-		settings = jQuery.extend({
-			resultsClass: 'fancy-select-container',
+		config = jQuery.extend({
+			containerClass: 'fancy-select',
+			resultsClass: 'fancy-select-results',
 			placeholderClass: 'fancy-select-replaced',
 			itemHoverClass: 'fancy-select-hover',
 			selectOpenClass : 'fancy-select-open',
 			selectHoverClass: 'fancy-select-hovered',
+			allowTextFilter: true,
 			
 			onItemEnter: function() {
-				$(this).addClass(settings.itemHoverClass);
+				$(this).addClass(config.itemHoverClass);
 			},
 			onItemLeave: function() {
-				$(this).removeClass(settings.itemHoverClass);
+				$(this).removeClass(config.itemHoverClass);
 			},
 			onOptionSelect: function() {
 				//
 			},
 			onSelectOpen: function() {
-				$(this).addClass(settings.selectOpenClass);
-				$(this).siblings(settings.getResultsSelector()).show().focus();
+				$(this).addClass(config.selectOpenClass);
+				$(this).siblings(config.getResultsSelector()).show();
 			},
 			onSelectClose: function() {
-				$(this).siblings(settings.getResultsSelector()).hide();
-				$(this).removeClass(settings.selectOpenClass);
+				$(this).siblings(config.getResultsSelector()).hide();
+				$(this).removeClass(config.selectOpenClass);
 			},
 			onSelectEnter: function() {
-				$(this).addClass(settings.selectHoverClass);
+				$(this).addClass(config.selectHoverClass);
 			},
 			onSelectLeave: function() {
-				$(this).removeClass(settings.selectHoverClass);
+				$(this).removeClass(config.selectHoverClass);
 			},
 			getResultsSelector: function() {
-				return "." + settings.resultsClass;
+				return "." + config.resultsClass;
 			},
 			getPlaceholderSelector: function() {
-				return "." + settings.placeholderClass;
+				return "." + config.placeholderClass;
 			},
 			getResultsContainer: function() {
-				return "<div class='"+ settings.resultsClass+"'></div>";
+				return "<div class='"+ config.resultsClass+"'></div>";
 			},
 			getPlaceholderContainer: function() {
-				return "<div class='"+ settings.placeholderClass+"'></div>";
-			},			
-		}, settings);
+				return "<div class='"+ config.placeholderClass+"'></div>";
+			},
+			getContainer: function() {
+				return "<div class='"+ config.containerClass+"'></div>";
+			}	
+		}, config);
 	
 		/**
 		 * Global document click handler
@@ -71,32 +85,98 @@
 			if(!e) {
 				var e = window.event;
 			}
-		
 			// if clicked element is a child of either the container or elements
-			if($(e.target).parents(settings.getResultsSelector()).length > 0) {
+			if($(e.target).parents(config.getResultsSelector()).length > 0) {
 				return;
 			}
 			
 			// if clicked element is the replaced section then ignore it
-			if($(e.target).parents(settings.getPlaceholderSelector()).length > 0) {
+			if($(e.target).parents(config.getPlaceholderSelector()).length > 0) {
 				return;
 			}
 			
 			// close all popups
-			$(settings.getResultsSelector()).each(function() {
-				settings.onSelectClose.call(this);
+			$(config.getPlaceholderSelector()).each(function() {
+				config.onSelectClose.call(this);
+			});
+		}).keydown(function(e) {
+			// move any of the selects on any of the key presses if they are
+			// actively open. There should only actually be one of these windows
+			// open at a time
+			$(config.getResultsSelector() +":visible").each(function() {
+				var move = undefined;
+				
+				switch(e.keyCode) {
+					case 38: // up key
+						e.preventDefault();	
+						
+						move = -1;
+					break;
+
+					case 40: // down key
+						e.preventDefault();
+						
+						move = 1;
+					break;
+
+					case 13: // return
+						e.preventDefault();
+						
+						move = 0;
+					break;
+				}
+				
+				if(typeof move !== "undefined") {
+					var currentLi = $("li."+config.itemHoverClass, this);	
+
+					if(!currentLi) {
+						if(move == 1) {
+							// select the first
+							$("li:first", this).addClass(config.itemHoverClass);
+						}
+					
+						// do nothing, nothing is selected
+						return
+					}
+					else {
+						// return, and selected li so I choose you
+						if(move == 0) {
+							$(currentLi).click();
+							
+							return;
+						}
+						
+						// get the index of the current one. Need to
+						// work out if we're able to go up
+
+
+						var list = $("li", this);
+						var i = list.index($(currentLi).get(0));
+						var pos = i+move;
+
+						if(pos > 0 && pos < list.length) {
+							currentLi.removeClass(config.itemHoverClass);
+							$("li:eq("+ pos +")	").addClass(config.itemHoverClass);
+						}
+						
+						return;
+					}
+					
+				}
 			});
 		});
-	
+		
+		
 		function Replacement(orig) {
+			var self = this;
 			this.select = orig;
+			this.container = $(config.getContainer());
 			
 			// Create a new container to hold the values of the select
-			this.results = $(settings.getResultsContainer());
+			this.results = $(config.getResultsContainer());
 			this.results.css({
 				'position': 'absolute',
-				'display': 'none',
-				'left': this.select.position().left
+				'display': 'none'
 			});
 			
 			list = $("<ul></ul>");
@@ -117,41 +197,81 @@
 			this.val = $('<input type="hidden" id="'+this.select.id +'" />');
 			this.val.name = this.select.attr('name');
 			this.val.value = selected.val();
-		
-			this.placeholder = $(settings.getPlaceholderContainer()).append(
-				$('<p class="fancy-placeholder"></p>').append(selected.text())
-			);
-
-			this.select.before(this.placeholder);
-			this.select.after(this.results);
-
-			this.select.attr('name', this.select.attr('name') + "-fancy-hidden").hide();
-			this.placeholder.show();
 			
+			// setup the default place holder.
+			// either it will just be a string of text or an input field. The input
+			// field allows a user to filter the list but we keep the p there, just
+			// do several layers of magic
+			this.placeholder_p = $('<p class="fancy-placeholder"></p>')
+				.append(selected.text())
+				.data('default', selected.text());
+				
+			this.placeholder = $(config.getPlaceholderContainer()).append(this.placeholder_p);
+			
+			if(config.allowTextFilter) {
+				this.placeholder_input = $('<input class="fancy-placeholder fancy-textbox" type="text" />')
+					.keydown(function(e) {
+						self.placeholder_p.text("");
+						if(self.results.is(":hidden")) {
+							config.onSelectOpen.call(self.placeholder);
+						}
+					}).keyup(function(e) {
+						if($(this).val() == "") {
+							self.placeholder_p.text(self.placeholder_p.data('default'));
+							$("li", list).show();
+						}
+						else {
+							self.placeholder_p.text("");
+							$("li:not(:Contains("+ $(this).val() + "))", list)
+								.hide()
+								.removeClass(config.itemHoverClass);
+							
+							var winners = $("li:Contains("+ $(this).val() + ")", list);
+							winners.show();
+							
+							$(":first", winners).addClass(config.itemHoverClass);
+						}
+					});
+				
+				this.placeholder_input.tabIndex = this.select.tabIndex;
+				this.placeholder.append(this.placeholder_input);
+			}
+			
+			this.container.append(this.placeholder);
+			this.container.append(this.results);
+			this.container.hide();
+			this.select.after(this.container);
+			this.select.attr('name', this.select.attr('name') + "-fancy-hidden").hide();
+			this.container.show();
 			/**
 			 * Setup the mouse events for clicking and selecting the options in the list
 			 * also adds hover effects and mouse out events.
 			 *
-			 * Uses the callback functions defined in the settings to provide the functionality
+			 * Uses the callback functions defined in the config to provide the functionality
 			 */
-			var self = this;
-			
 			this.placeholder.click(function() {
 				// if the related select is open then close them all else close everything apart from
 				// the one which is needed
-				var open = (self.results.is(":visible")) ? false : true;
-				
-				$(settings.getResultsSelector()).each(function() {
-					settings.onSelectClose.call(this);
+				var hidden = (self.results.is(":hidden"));
+
+				$(config.getPlaceholderSelector()).each(function() {
+					if($(this).siblings(config.getResultsSelector()).is(":hidden")) {
+						config.onSelectClose.call(this);
+					}
 				});
-				
-				if(open) {
-					settings.onSelectOpen.call(this);
+
+				if(hidden) {
+					config.onSelectOpen.call(this);
+					
+					// if we have an input then focus that field so users can type
+					if(config.allowTextFilter) {
+						self.placeholder_input.focus();
+					}
 				}
 			}).hover(function() {
-				settings.onSelectEnter.call(this);
+				config.onSelectEnter.call(this);
 			}, function() {
-				settings.onSelectLeave.call(this);
+				config.onSelectLeave.call(this);
 			});
 			
 			/**
@@ -179,14 +299,14 @@
 			$("li", results).click(function() {
 				replacement.setSelectedItem($(this));
 
-				settings.onOptionSelect.call(this);
-				settings.onSelectClose.call(replacement.placeholder);
+				config.onOptionSelect.call(this);
+				config.onSelectClose.call(replacement.placeholder);
 				
 			}).hover(function() {
-				settings.onItemEnter.call(this);
+				config.onItemEnter.call(this);
 				
 			}, function() {
-				settings.onItemLeave.call(this);
+				config.onItemLeave.call(this);
 				
 			});
 		});

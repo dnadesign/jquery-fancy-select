@@ -13,16 +13,40 @@
 			 * use just these but it should be functional and you can
 			 * go bananas
 			 */
-			.fancy-select-container {
+			.fancy-select {
+				position: relative;
+			}
+			
+			.fancy-select-results {
 				height: 200px;
 				overflow: hidden;
 				overflow-y: auto;
 				background: white;
-				width: 450px;
+				width: 480px;
+				outline: none;
 			}
 			
 			.fancy-select-replaced {
+				height: 30px;
+				overflow: hidden;
+			}
+			
+			.fancy-select-replaced,
+			.fancy-select-replaced input {
+				outline: none;
 				cursor: pointer;
+			}
+				
+			.fancy-select-hover {
+				background-color: Highlight;
+				color: HighlightText;
+			}
+
+			/* only needed if you allow text filtering */
+			.fancy-textbox {
+				position: absolute;
+				top: 0;
+				left: 0;
 			}
 		</style>
 		
