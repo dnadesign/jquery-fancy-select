@@ -104,27 +104,7 @@ jQuery.expr[':'].Contains = function(a,i,m) {
 			// actively open. There should only actually be one of these windows
 			// open at a time
 			$(config.getResultsSelector() +":visible").each(function() {
-				var move = undefined;
-				
-				switch(e.keyCode) {
-					case 38: // up key
-						e.preventDefault();	
-						
-						move = -1;
-					break;
-
-					case 40: // down key
-						e.preventDefault();
-						
-						move = 1;
-					break;
-
-					case 13: // return
-						e.preventDefault();
-						
-						move = 0;
-					break;
-				}
+				if(/38|40|13/.test(e.keyCode)) {
 				
 				if(typeof move !== "undefined") {
 					var currentLi = $("li."+config.itemHoverClass, this);	
@@ -148,8 +128,6 @@ jQuery.expr[':'].Contains = function(a,i,m) {
 						
 						// get the index of the current one. Need to
 						// work out if we're able to go up
-
-
 						var list = $("li", this);
 						var i = list.index($(currentLi).get(0));
 						var pos = i+move;
@@ -163,26 +141,37 @@ jQuery.expr[':'].Contains = function(a,i,m) {
 					}
 					
 				}
+				}
 			});
 		});
 		
-		
-		function Replacement(orig) {
-			var self = this;
+		/**
+		 * Representation of a replaced selected. Has one constructor argument
+		 * required and that is the original select field we're replacing.
+		 *
+		 * The other configuration comes from the config
+		 */
+		function FancySelectReplacement(orig) {
 			this.select = orig;
 			this.container = $(config.getContainer());
-			
-			// Create a new container to hold the values of the select
-			this.results = $(config.getResultsContainer());
-			this.results.css({
+			this.results = $(config.getResultsContainer()).css({
 				'position': 'absolute',
 				'display': 'none'
 			});
 			
+			return this.init();
+		}
+		
+		/**
+		 * Replace the built in select with the container and the results
+		 */
+		FancySelectReplacement.prototype.init = function() {
+			var list, selected, placeholder_p, placeholder_i;
+			var self = this;
+			
 			list = $("<ul></ul>");
 			
-			// convert all options to list items and save the values as attributes
-			// since options can have titles. 
+			// convert all options to list items and save the values as data attributes
 			this.select.children('option').each(function() {
 				list.append(
 					$("<li>"+ $(this).text() + "</li>").data("value", $(this).val())
@@ -193,7 +182,7 @@ jQuery.expr[':'].Contains = function(a,i,m) {
 
 			// Convert the ye old select tag to a simple div and add the classes
 			// required change the select form value to a hidden field.
-		 	var selected = $("option:selected", this.select);
+		 	selected = $("option:selected", this.select);
 			this.val = $('<input type="hidden" id="'+this.select.id +'" />');
 			this.val.name = this.select.attr('name');
 			this.val.value = selected.val();
@@ -202,98 +191,110 @@ jQuery.expr[':'].Contains = function(a,i,m) {
 			// either it will just be a string of text or an input field. The input
 			// field allows a user to filter the list but we keep the p there, just
 			// do several layers of magic
-			this.placeholder_p = $('<p class="fancy-placeholder"></p>')
+			placeholder_p = $('<p class="fancy-placeholder"></p>')
 				.append(selected.text())
 				.data('default', selected.text());
-				
-			this.placeholder = $(config.getPlaceholderContainer()).append(this.placeholder_p);
+			
+			this.placeholder = $(config.getPlaceholderContainer())
+				.click(function() {
+					// if the related select is open then close them all else close everything apart from
+					// the one which is needed
+					var hidden = (self.results.is(":hidden"));
+
+					$(config.getPlaceholderSelector()).each(function() {
+						config.onSelectClose.call(this);
+					});
+
+					if(hidden) {
+						config.onSelectOpen.call(this);
+
+						// if we have an input then focus that field so users can type
+						if(config.allowTextFilter) {
+							self.focus();
+						}
+					}
+				}).hover(function() {
+					config.onSelectEnter.call(this);
+				}, function() {
+					config.onSelectLeave.call(this);
+				})
+				.append(placeholder_p);
 			
 			if(config.allowTextFilter) {
-				this.placeholder_input = $('<input class="fancy-placeholder fancy-textbox" type="text" />')
+				var input = $('<input class="fancy-placeholder fancy-textbox" type="text" />')
 					.keydown(function(e) {
-						self.placeholder_p.text("");
-						if(self.results.is(":hidden")) {
+						// on keydown we can't test for values, but we can be safely assume and say
+						// if any key other than direction and return then there will be input
+						if(!(/37|38|39|40|13/.test(e.keyCode))) {
+							placeholder_p.text("");
+						}
+						
+						// if the dropdown is hidden (i.e we focused directly to the input) then
+						// make sure it is open
+						if(results.is(":hidden")) {
 							config.onSelectOpen.call(self.placeholder);
 						}
 					}).keyup(function(e) {
-						if($(this).val() == "") {
-							self.placeholder_p.text(self.placeholder_p.data('default'));
+						// strip out any parentheses values from the input
+						// as the selector blafs on ()
+						var token = $(this).val().replace(/[\(|\)]/gi, '');
+
+						if(token.length < 1) {
+							placeholder_p.text(placeholder_p.data('default'));
 							$("li", list).show();
 						}
 						else {
-							self.placeholder_p.text("");
-							$("li:not(:Contains("+ $(this).val() + "))", list)
+
+							placeholder_p.text("");
+							$("li:not(:Contains("+ token + "))", list)
 								.hide()
 								.removeClass(config.itemHoverClass);
 							
-							var winners = $("li:Contains("+ $(this).val() + ")", list);
+							var winners = $("li:Contains("+ token + ")", list);
 							winners.show();
 							
 							$(":first", winners).addClass(config.itemHoverClass);
 						}
 					});
+					
+				input.attr('tabIndex', this.select.tabIndex);
 				
-				this.placeholder_input.tabIndex = this.select.tabIndex;
-				this.placeholder.append(this.placeholder_input);
+				this.placeholder.append(input);
 			}
 			
 			this.container.append(this.placeholder);
 			this.container.append(this.results);
 			this.container.hide();
+			
 			this.select.after(this.container);
 			this.select.attr('name', this.select.attr('name') + "-fancy-hidden").hide();
 			this.container.show();
-			/**
-			 * Setup the mouse events for clicking and selecting the options in the list
-			 * also adds hover effects and mouse out events.
-			 *
-			 * Uses the callback functions defined in the config to provide the functionality
-			 */
-			this.placeholder.click(function() {
-				// if the related select is open then close them all else close everything apart from
-				// the one which is needed
-				var hidden = (self.results.is(":hidden"));
-
-				$(config.getPlaceholderSelector()).each(function() {
-					if($(this).siblings(config.getResultsSelector()).is(":hidden")) {
-						config.onSelectClose.call(this);
-					}
-				});
-
-				if(hidden) {
-					config.onSelectOpen.call(this);
-					
-					// if we have an input then focus that field so users can type
-					if(config.allowTextFilter) {
-						self.placeholder_input.focus();
-					}
-				}
-			}).hover(function() {
-				config.onSelectEnter.call(this);
-			}, function() {
-				config.onSelectLeave.call(this);
-			});
-			
-			/**
-			 * Set the passed list item as the selected option in the
-			 * dropdrown
-			 *
-			 * @param string
-			 */
-			this.setSelectedItem = function(li) {
-				// set the placeholder text
-				self.placeholder.find(".fancy-placeholder").text(li.text());
-				
-				// set the hidden field title
-				self.val.val(li.data('value'));
-			}
 			
 			return this;
+		}
+	
+		/**
+		 * Set the passed list item as the selected option in the
+		 * dropdrown
+		 *
+		 * @param string
+		 */
+		FancySelectReplacement.prototype.setSelectedItem = function(li) {
+			this.placeholder.find(".fancy-placeholder").text(li.text());
+			this.val.val(li.data('value'));
+		}
+		
+		/**
+		 * Focus event to the FancySelect. Should focus the text field
+		 * placeholder if enabled.
+		 */
+		FancySelectReplacement.prototype.focus = function() {
+			$(this.placeholder).find("input").focus();
 		}
 		
 		return this.each(function() {
 			var select = $(this);
-			var replacement = new Replacement(select);
+			var replacement = new FancySelectReplacement(select);
 			var results = replacement.results;
 			
 			$("li", results).click(function() {
