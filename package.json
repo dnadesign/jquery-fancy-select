@@ -1,0 +1,10 @@
+{
+	"name": "jqueryFancySelect",
+	"devDependencies": {
+		"grunt": "~0.4.1",
+		"grunt-contrib-jshint": "*",
+		"grunt-contrib-uglify": "*",
+		"grunt-contrib-qunit": "*",
+		"grunt-contrib-watch": "*"
+	}
+}
